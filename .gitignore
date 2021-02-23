@@ -4,6 +4,7 @@ terraform.tfstate
 terraform.tfvars
 *.tfstate*
 .idea
+**.terraform.lock.hcl
 
 # OS X files
 .history

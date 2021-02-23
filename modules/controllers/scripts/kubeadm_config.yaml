@@ -1,0 +1,41 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+bootstrapTokens:
+  - token: "${controller_join_token}"
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v${k8s_deb_package_version}
+apiServer:
+  extraArgs:
+    profiling: "false"
+    enable-admission-plugins: ${enable_admission_plugins}
+    audit-log-path: "/var/log/kube-audit/audit-log.json"
+    audit-policy-file: "/etc/kubernetes/kube-audit/audit-policy.yaml"
+    audit-log-maxage: "30" # The maximum number of days to retain old audit log files based on the timestamp encoded in their filename.
+    audit-log-maxbackup: "10" # The maximum number of old audit log files to retain.
+    audit-log-maxsize: "100" # The maximum size in megabytes of the audit log file before it gets rotated.
+    encryption-provider-config: "/etc/kubernetes/etcd-encryption/etcd-enc.yaml"
+  #    kubelet-certificate-authority: "/etc/kubernetes/pki/ca.crt"
+  extraVolumes:
+    - name: "etcd-encryption"
+      hostPath: "/etc/kubernetes/etcd-encryption"
+      mountPath: "/etc/kubernetes/etcd-encryption"
+      readOnly: true
+      pathType: DirectoryOrCreate
+    - name: "k8s-audit"
+      hostPath: "/etc/kubernetes/kube-audit"
+      mountPath: "/etc/kubernetes/kube-audit"
+      readOnly: true
+      pathType: DirectoryOrCreate
+    - name: "k8s-audit-logs"
+      hostPath: "/var/log/kube-audit/"
+      mountPath: "/var/log/kube-audit/"
+      readOnly: false
+      pathType: DirectoryOrCreate
+controllerManager:
+  extraArgs:
+    profiling: "false"
+scheduler:
+  extraArgs:
+    profiling: "false"
